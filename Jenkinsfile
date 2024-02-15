@@ -78,12 +78,12 @@ pipeline {
     post {
         failure {
             mail subject: "Pipeline Failed: ${currentBuild.fullDisplayName}",
-                      body: "Something went wrong with the pipeline. Please check the Jenkins console for details.",
+                      body: "Something went wrong with the pipeline. Please check the Jenkins console for ${env.BUILD_URL}",
                       to: "bha@gm.com"
         }
         success {
             mail subject: "Pipeline Successful: ${currentBuild.fullDisplayName}",
-                      body: "The pipeline completed successfully. No further action is required.",
+                      body: "The pipeline completed successfully. No further action is required ${env.BUILD_URL}",
                       to: "bha@gm.com"
         }
     }
