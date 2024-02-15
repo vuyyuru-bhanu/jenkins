@@ -1,6 +1,6 @@
 pipeline {
     agent { label 'mav' }
-    parameters { choice(name: 'branch', choices: ['main', 'test'], description: 'choice to branch') }. 
+    parameters { choice(name: 'branch', choices: ['main', 'test'], description: 'choice to branch') } 
 
     tools {
         jdk 'jdk8' // Use default JDK for initial stages
