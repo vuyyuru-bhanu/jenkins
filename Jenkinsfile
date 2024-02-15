@@ -1,7 +1,7 @@
 pipeline {
     agent { label 'mav' }
     parameters { choice(name: 'branch', choices: ['main', 'test'], description: 'choice to branch') } 
-
+    triggers { pollSCM('* * * * *') }
     tools {
         jdk 'jdk8' // Use default JDK for initial stages
     }
