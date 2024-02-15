@@ -10,7 +10,7 @@ pipeline {
         stage('Checkout Game of Life') {
             steps {
                 script {
-                    git url: 'https://github.com/wakaleo/game-of-life.git', branch: "${branch}"
+                    git url: 'https://github.com/wakaleo/game-of-life.git', branch: "${params.branch}"
                 }
             }
         }
