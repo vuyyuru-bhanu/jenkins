@@ -1,5 +1,6 @@
 pipeline {
     agent { label 'mav' }
+    parameters { choice(name: 'branch', choices: ['main', 'test'], description: 'choice to branch') }. 
 
     tools {
         jdk 'jdk8' // Use default JDK for initial stages
@@ -9,7 +10,7 @@ pipeline {
         stage('Checkout Game of Life') {
             steps {
                 script {
-                    git url: 'https://github.com/wakaleo/game-of-life.git', branch: 'master'
+                    git url: 'https://github.com/wakaleo/game-of-life.git', branch: "${branch}"
                 }
             }
         }
