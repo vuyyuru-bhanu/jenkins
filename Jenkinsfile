@@ -18,7 +18,7 @@ pipeline {
         stage('Build Game of Life') {
             steps {
                 script {
-                    sh 'mvn packagee'
+                    sh 'mvn package'
                 }
             }
         }
@@ -59,7 +59,7 @@ pipeline {
                         stage('Build Spring Petclinic'){
                         // Build Spring Petclinic
                         def jdkPath = '/usr/lib/jvm/java-21-openjdk-amd64'
-                        sh "export JAVA_HOME=${jdkPath} && export PATH=${jdkPath}/bin:${PATH} && mvn packagee"
+                        sh "export JAVA_HOME=${jdkPath} && export PATH=${jdkPath}/bin:${PATH} && mvn package"
                         }
                         stage('Archive Artifacts Spring Petclinic'){
                         // Archive artifacts from the 'spring-petclinic' directory
