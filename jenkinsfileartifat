@@ -1,122 +1,49 @@
 pipeline {
-
     agent { label 'jav' }
-
     parameters {
-
         string(name: 'MAVEN_GOAL', defaultValue: 'clean install', description: 'maven goal')
- }
+    }
     stages {
-
         stage('vcs') {
-
             steps {
-
                 git branch: "main", url: 'https://github.com/spring-projects/spring-petclinic.git'
-
-
-
-
             }
-
-
-
-
         }
 
-         stage ('Artifactory configuration') {
-
+        stage('Artifactory configuration') {
             steps {
-
                 rtServer (
-
-                    id: "JFROG_OCT22", //docker run --name artifactory -d -p 8081:8081 -p 8082:8082 docker.bintray.io/jfrog/artifactory-oss:latest use this docker image
-
-                    url: "http://ip172-18-0-133-cn9f4us7vdo000aksn6g-8082.direct.labs.play-with-docker.com/artifactoryg",
-
+                    id: "JFROG_OCT22",
+                    url: "http://ip172-18-0-133-cn9f4us7vdo000aksn6g-8082.direct.labs.play-with-docker.com/artifactory",
                     credentialsId: "jfrog"
-
                 )
-
-
-
 
                 rtMavenDeployer (
-
-                    
-
                     id: "rel-snapshots",
-
                     serverId: "JFROG_OCT22",
-
                     releaseRepo: 'libs-release-local/',
-
                     snapshotRepo: 'libs-snapshot-local/'
-
                 )
-
-
-
-
-
-
-
             }
-
         }
 
-
-
-
-        stage ('Exec Maven') {
-
+        stage('Exec Maven') {
             steps {
-
                 rtMavenRun (
-
                     tool: 'mvn', // Tool name from Jenkins configuration
-
                     pom: 'pom.xml',
-
                     goals: 'clean install',
-
                     deployerId: "rel-snapshots"
-
                 )
-
             }
-
-
-
-
         }
 
-
-
-
-        stage ('Publish build info') {
-
+        stage('Publish build info') {
             steps {
-
                 rtPublishBuildInfo (
-
                     serverId: "JFROG_OCT22"
-
                 )
-
             }
-
         }
-
-
-
-
-
-
-
     }
-
-
-
-
 }
