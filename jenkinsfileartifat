@@ -30,7 +30,7 @@ pipeline {
 
                 rtServer (
 
-                    id: "JFROG_OCT22",
+                    id: "JFROG_OCT22", //docker run --name artifactory -d -p 8081:8081 -p 8082:8082 docker.bintray.io/jfrog/artifactory-oss:latest use this docker image
 
                     url: "http://ip172-18-0-133-cn9f4us7vdo000aksn6g-8082.direct.labs.play-with-docker.com/artifactoryg",
 
