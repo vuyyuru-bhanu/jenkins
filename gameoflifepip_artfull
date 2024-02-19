@@ -1,0 +1,62 @@
+pipeline {
+    agent { label 'jav21slave' }
+    tools { jdk 'jdk8'}
+    parameters {
+        string(name: 'MAVEN_GOAL', defaultValue: 'clean install', description: 'maven goal')
+    }
+    stages {
+        stage('vcs') {
+            steps {
+                git branch: "master", url: 'https://github.com/wakaleo/game-of-life.git'
+            }
+        }
+
+        stage('Artifactory configuration') {
+            steps {
+                rtServer (
+                    id: "JFROG_OCT22",
+                    url: "http://ip172-18-0-51-cn9qbc47vdo0008a0110-8082.direct.labs.play-with-docker.com/artifactory",
+                    credentialsId: "jfrog"
+                )
+
+                rtMavenDeployer (
+                    id: "rel-snapshots",
+                    serverId: "JFROG_OCT22",
+                    releaseRepo: 'libs-release-local/',
+                    snapshotRepo: 'libs-snapshot-local/'
+                )
+            }
+        }
+
+        stage('Exec Maven') {
+            steps {
+                rtMavenRun (
+                    tool: 'mvn', // Tool name from Jenkins configuration
+                    pom: 'pom.xml',
+                    goals: 'clean install',
+                    deployerId: "rel-snapshots"
+                )
+            }
+        }
+
+        stage('Publish build info') {
+            steps {
+                rtPublishBuildInfo (
+                    serverId: "JFROG_OCT22"
+                )
+            }
+        }
+    }
+    post {
+        failure {
+            mail subject: "Pipeline Failed: ${currentBuild.fullDisplayName}",
+                      body: "Something went wrong with the pipeline. Please check the Jenkins console for details ${env.BUILD_URL}",
+                      to: "bha@gm.com"
+        }
+        success {
+            mail subject: "Pipeline Successful: ${currentBuild.fullDisplayName}",
+                      body: "The pipeline completed successfully. No further action is required, Please check the Jenkins console for details ${env.BUILD_URL}",
+                      to: "bha@gm.com"
+        }
+    }
+}
