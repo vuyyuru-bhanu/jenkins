@@ -1,0 +1,83 @@
+pipeline {
+    agent { label 'jav21slave' }
+    tools { 
+        jdk 'jdk21'
+        maven 'mvn' // Assuming Maven tool is configured in Jenkins
+    }
+   
+    stages {
+        stage('VCS Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/spring-projects/spring-petclinic.git'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    // Run SonarQube analysis with Maven
+                    withSonarQubeEnv('sonar-server') {
+                        sh "mvn clean install sonar:sonar -Dsonar.organization=bellcgi -Dsonar.projectKey=bellcgi_cgi"
+                    }
+                }
+            }
+        }
+        stage("Quality gate"){
+           steps {
+                script {
+                    waitForQualityGate abortPipeline: true, credentialsId: 'sonar'
+                }
+            } 
+        }
+
+        stage('Artifactory configuration') {
+            steps {
+                rtServer (
+                    id: "JFROG_OCT22",
+                    url: "https://bvp.jfrog.io/artifactory",
+                    credentialsId: "jfrog"
+                )
+
+                rtMavenDeployer (
+                    id: "rel-snapshots",
+                    serverId: "JFROG_OCT22",
+                    releaseRepo: 'bell-libs-release-local/',
+                    snapshotRepo: 'bell-libs-snapshot-local/'
+                )
+            }
+        }
+
+        stage('Exec Maven') {
+            steps {
+                rtMavenRun (
+                    tool: 'mvn', // Tool name from Jenkins configuration
+                    pom: 'pom.xml',
+                    goals: 'clean deploy',
+                    deployerId: "rel-snapshots"
+                )
+            }
+        }
+
+        stage('Publish build info') {
+            steps {
+                rtPublishBuildInfo (
+                    serverId: "JFROG_OCT22"
+                )
+            }
+        }
+    }
+    post {
+        failure {
+            mail subject: "Pipeline Failed: ${currentBuild.fullDisplayName}",
+                      body: "Something went wrong with the pipeline. Please check the Jenkins console for details ${env.BUILD_URL}",
+                      to: "bha@gm.com"
+        }
+        success {
+            mail subject: "Pipeline Successful: ${currentBuild.fullDisplayName}",
+                      body: "The pipeline completed successfully. No further action is required, Please check the Jenkins console for details ${env.BUILD_URL}",
+                      to: "bha@gm.com"
+        }
+    }
+
+    }
+
