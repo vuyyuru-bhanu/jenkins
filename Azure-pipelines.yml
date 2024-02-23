@@ -1,6 +1,7 @@
 - pipeline
 - pool:
-  vmImage: ubuntu-22.04
+name: "Azure Pipelines"
+  vmImage: "ubuntu-22.04"
 steps:
   - task: Maven@3
     inputs:
