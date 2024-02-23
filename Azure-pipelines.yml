@@ -1,0 +1,11 @@
+- pipeline
+- pool:
+  vmImage: ubuntu-22.04
+steps:
+  - task: Maven@3
+    inputs:
+      mavenPomFile: 'pom.xml'
+      goals: 'package'
+      publishJUnitResults: yes
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
+      jdkVersionOption: '1.11'
