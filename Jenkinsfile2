@@ -1,0 +1,361 @@
+pipeline {
+    agent {
+        label 'gamenode'
+    }
+
+    tools {
+        // Specify the JDK version and use the configured Maven tool
+        jdk 'jdk8'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    // Use 'git' step to checkout code from the GitHub repository
+                    git url: 'https://github.com/wakaleo/game-of-life.git', branch: 'master'
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    // Use the configured Maven tool
+                    sh 'mvn package'
+                }
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                // Use 'archiveArtifacts' step to archive the WAR file
+                archiveArtifacts 'gameoflife-web/target/*.war'
+            }
+        }
+
+        stage('Publish Test Results') {
+            steps {
+                // Use 'junit' step to publish JUnit test results
+                junit '**/surefire-reports/*.xml'
+            }
+        }
+    }
+}
+
+
+
+
+
+##############################################
+node('mav') {
+    stage('Set JAVA_HOME') {
+        script {
+            def javaHome = tool 'jdk17'
+
+            env.JAVA_HOME = javaHome
+            env.PATH = "${javaHome}/bin:${env.PATH}"
+            echo "JAVA_HOME: ${env.JAVA_HOME}"
+            echo "PATH: ${env.PATH}"
+        }
+    }
+
+    stage('vcs') {
+        git branch: 'main', url: 'https://github.com/spring-projects/spring-petclinic.git'
+    }
+
+    stage('build') {
+        sh 'java -version' // Verify Java version
+        sh 'mvn clean package -e -X'
+    }
+
+    stage('artifacts') {
+        archiveArtifacts 'target/*.jar'
+    }
+
+    stage('test results') {
+        junit '**/surefire-reports/*.xml'
+    } 
+}
+
+###############################################################
+node('mav') {
+    stage('Set JAVA_HOME') {
+        script {
+            def javaHome = tool 'java8'
+
+            env.JAVA_HOME = javaHome
+            env.PATH = "${javaHome}/bin:${env.PATH}"
+            echo "JAVA_HOME: ${env.JAVA_HOME}"
+            echo "PATH: ${env.PATH}"
+        }
+    }
+    stage('vcs') {
+    git 'https://github.com/wakaleo/game-of-life.git'
+        }
+    stage('build') {
+    sh 'mvn package'
+     }
+     stage('artifacts') {
+    archiveArtifacts 'gameoflife-web/target/*.war'
+     }
+     stage('testresluts') {
+   junit '**/surefire-reports/*.xml'
+     }
+}
+
+##################################################################################
+pipeline {
+    
+    agent {label 'spring'}
+     tools {
+        jdk 'jdk8' 
+    }
+    stages {
+     stage('Checkout') {
+            steps {
+                script {
+                    // Use 'git' step to checkout code from the GitHub repository
+                    git url: 'https://github.com/wakaleo/game-of-life.git', branch: 'master'
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    // Use the configured Maven tool
+                    sh 'mvn package'
+                }
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                // Use 'archiveArtifacts' step to archive the WAR file
+                archiveArtifacts 'gameoflife-web/target/*.war'
+            }
+        }
+
+        stage('Publish Test Results') {
+            steps {
+                // Use 'junit' step to publish JUnit test results
+                junit '**/surefire-reports/*.xml'
+            }
+
+ }
+}
+}
+
+##########################################################################
+pipeline {
+    agent { label 'spring' }
+
+    tools {
+        jdk 'jdk8'
+    }
+
+    stages {
+        stage('Checkout Game of Life') {
+            steps {
+                script {
+                    git url: 'https://github.com/wakaleo/game-of-life.git', branch: 'master'
+                }
+            }
+        }
+
+        stage('Build Game of Life') {
+            steps {
+                script {
+                    sh 'mvn package'
+                }
+            }
+        }
+
+        stage('Archive Artifacts Game of Life') {
+            steps {
+                archiveArtifacts 'gameoflife-web/target/*.war'
+            }
+        }
+
+        stage('Publish Test Results Game of Life') {
+            steps {
+                junit '**/surefire-reports/*.xml'
+            }
+        }
+
+        stage('Checkout Spring Petclinic') {
+            steps {
+                script {
+                    git url: 'https://github.com/spring-projects/spring-petclinic.git', branch: 'main'
+                }
+            }
+        }
+
+        stage('Build Spring Petclinic') {
+            steps {
+                script {
+                    sh 'mvn package'
+                }
+            }
+        }
+
+        stage('Archive Artifacts Spring Petclinic') {
+            steps {
+                archiveArtifacts 'target/*.jar'
+            }
+        }
+
+        stage('Publish Test Results Spring Petclinic') {
+            steps {
+                junit '**/surefire-reports/*.xml'
+            }
+        }
+    }
+}
+########################################################################################
+pipeline {
+    agent { label 'mav' }
+
+    tools {
+        jdk 'jdk8' // Use default JDK for initial stages
+    }
+
+    stages {
+        stage('Checkout Game of Life') {
+            steps {
+                script {
+                    git url: 'https://github.com/wakaleo/game-of-life.git', branch: 'master'
+                }
+            }
+        }
+
+        stage('Build Game of Life') {
+            steps {
+                script {
+                    sh 'mvn package'
+                }
+            }
+        }
+
+        stage('Archive Artifacts Game of Life') {
+            steps {
+                archiveArtifacts 'gameoflife-web/target/*.war'
+            }
+        }
+
+        stage('Publish Test Results Game of Life') {
+            steps {
+                junit '**/surefire-reports/*.xml'
+            }
+        }
+
+        stage('Checkout Spring Petclinic') {
+            steps {
+                script {
+                    git url: 'https://github.com/spring-projects/spring-petclinic.git', branch: 'main'
+                }
+            }
+        }
+
+        stage('Use JDK 21 for Spring Petclinic') {
+            steps {
+                script {
+                    // Specify the correct path to JDK 21
+                    def jdkPath = '/usr/lib/jvm/java-21-openjdk-amd64'
+                    sh "export JAVA_HOME=${jdkPath} && export PATH=${jdkPath}/bin:${PATH} && mvn package"
+                }
+            }
+        }
+
+        stage('Archive Artifacts Spring Petclinic') {
+            steps {
+                archiveArtifacts 'target/*.jar'
+            }
+        }
+
+        stage('Publish Test Results Spring Petclinic') {
+            steps {
+                junit '**/surefire-reports/*.xml'
+            }
+        }
+    }
+}
+###################################################################
+pipeline {
+    agent { label 'mav' }
+
+    tools {
+        jdk 'jdk8' // Use default JDK for initial stages
+    }
+
+    stages {
+        stage('Checkout Game of Life') {
+            steps {
+                script {
+                    git url: 'https://github.com/wakaleo/game-of-life.git', branch: 'master'
+                }
+            }
+        }
+
+        stage('Build Game of Life') {
+            steps {
+                script {
+                    sh 'mvn package'
+                }
+            }
+        }
+
+        stage('Archive Artifacts Game of Life') {
+            steps {
+                archiveArtifacts 'gameoflife-web/target/*.war'
+            }
+        }
+
+        stage('Publish Test Results Game of Life') {
+            steps {
+                junit '**/surefire-reports/*.xml'
+            }
+        }
+
+        stage('Use JDK 21 for Spring Petclinic') {
+            steps {
+                script {
+                    // Specify the correct path to JDK 21
+                    def jdkPath = '/usr/lib/jvm/java-21-openjdk-amd64'
+                    sh "export JAVA_HOME=${jdkPath} && export PATH=${jdkPath}/bin:${PATH}"
+                }
+            }
+        }
+
+        stage('Checkout and Build Spring Petclinic') {
+            steps {
+                script {
+                    // Specify the directory for spring-petclinic
+                    def springPetclinicDir = 'spring-petclinic'
+
+                    // Checkout Spring Petclinic in the specified directory
+                    dir(springPetclinicDir) {
+                        stage('Checkout Spring Petclinicit'){
+                        git url: 'https://github.com/spring-projects/spring-petclinic.git', branch: 'main'
+                        }
+                        stage('Build Spring Petclinic'){
+                        // Build Spring Petclinic
+                        def jdkPath = '/usr/lib/jvm/java-21-openjdk-amd64'
+                        sh "export JAVA_HOME=${jdkPath} && export PATH=${jdkPath}/bin:${PATH} && mvn package"
+                        }
+                        stage('Archive Artifacts Spring Petclinic'){
+                        // Archive artifacts from the 'spring-petclinic' directory
+                        archiveArtifacts "target/*.jar"}
+                        stage('Publish Test Results Spring Petclinic'){
+                        // Publish JUnit test results from the 'spring-petclinic' directory
+                        junit "**/surefire-reports/*.xml"
+                        }
+                    }
+                    
+                    
+                }
+            }
+        }
+    }
+}
